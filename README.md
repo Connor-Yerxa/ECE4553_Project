@@ -6,40 +6,14 @@ The necessary data can be downloaded from https://doi.org/10.5281/zenodo.4064408
 
 ## Environment Setup
 
-This code requires Python 3.6 or later.
-We strongly recommend running in a new Anaconda environment.
+uses `pip` for libraries. I have this running on `python 3.10`, but later versions should work.
 
-First we will do some conda installs.  Your environment must use CUDA 10.1 exactly, since DeepSpeech was compiled with this version.
-```
-conda install cudatoolkit=10.1
-conda install pytorch -c pytorch
-conda install libsndfile=1.0.28 -c conda-forge
-```
+Run `Train_emg.bat` to install requirements and begin training the model.
 
-Pull nv-wavenet into the `nv_wavenet` folder and follow build intructions provided in the repository.
-```
-git clone https://github.com/NVIDIA/nv-wavenet.git nv_wavenet
-# follow build instructions in nv_wavenet/pytorch
-```
-If you have an older GPU, you may need to use https://github.com/dgaddy/nv-wavenet instead, which removes code for 16-bit floating point that only works on newer GPUs.
+`requirements.txt` have all of the necessary libraries to run the code.
 
-The rest of the required packages can be installed with pip.
-```
-pip install absl-py librosa soundfile matplotlib scipy scikit-learn numba jiwer unidecode deepspeech==0.8.2
-```
-
-Download pre-trained DeepSpeech model files.  It is important that you use DeepSpeech version 0.7.0 model files to maintain consistency of evaluation.  Note that the DeepSpeech pip package we recommend is version 0.8.2 (which uses a more up-to-date CUDA), but this is compatible with version 0.7.x model files.
-```
-curl -LO https://github.com/mozilla/DeepSpeech/releases/download/v0.7.0/deepspeech-0.7.0-models.pbmm
-curl -LO https://github.com/mozilla/DeepSpeech/releases/download/v0.7.0/deepspeech-0.7.0-models.scorer
-```
 
 ## Running
-
-To train a WaveNet model, use
-```
-python wavenet_model.py --output_directory "./models/wavenet_model/" --voiced_data_directories "./emg_data/voiced_parallel_data,./emg_data/nonparallel_data"
-```
 
 To train an EMG to speech feature transduction model, use
 ```

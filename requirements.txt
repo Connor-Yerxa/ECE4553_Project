@@ -1,6 +1,5 @@
 nltk
 noisereduce
-torch
 scipy
 sounddevice
 brainflow
@@ -19,3 +18,4 @@ scikit-learn
 numba 
 jiwer 
 unidecode
+torch

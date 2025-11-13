@@ -1,2 +1,4 @@
 emg_data/
 models/
+.venv/
+.idea/

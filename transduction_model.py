@@ -2,6 +2,8 @@ import os
 import sys
 import numpy as np
 
+# To run Training, copy .\Train_emg.bat
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -25,6 +27,8 @@ flags.DEFINE_boolean('no_cca', False, "don't use CCA to refine alignments")
 flags.DEFINE_string('start_training_from', None, 'start training from this model')
 flags.DEFINE_float('data_size_fraction', 1.0, 'fraction of training data to use')
 flags.DEFINE_boolean('no_session_embed', False, "don't use a session embedding")
+
+n_epochs = 1
 
 class Model(nn.Module):
     def __init__(self, num_ins, num_outs, num_sessions):
@@ -185,9 +189,10 @@ def main():
     print('output example:', devset.example_indices[0])
     print('train / dev split:',len(trainset),len(devset))
 
+    # device = 'cuda' #forces cuda cores
     device = 'cuda' if torch.cuda.is_available() and not FLAGS.debug else 'cpu'
 
-    model = train_model(trainset, devset, device, save_sound_outputs=(FLAGS.pretrained_wavenet_model is not None))
+    model = train_model(trainset, devset, device, save_sound_outputs=(FLAGS.pretrained_wavenet_model is not None), n_epochs=n_epochs)
 
 if __name__ == '__main__':
     print(sys.argv)

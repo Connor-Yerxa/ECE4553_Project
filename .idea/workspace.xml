@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a273db2-961e-4860-a649-f3a7c2a74923" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Transcription.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/evaluate.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/generate_audio.bat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Train_emg.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Train_emg.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/align.py" beforeDir="false" afterPath="$PROJECT_DIR$/align.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/asr.py" beforeDir="false" afterPath="$PROJECT_DIR$/asr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/transduction_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/transduction_model.py" afterDir="false" />
     </list>

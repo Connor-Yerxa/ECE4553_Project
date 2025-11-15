@@ -232,7 +232,7 @@ def train_model(trainset, devset, device, save_sound_outputs=True, n_epochs=50):
 
     if save_sound_outputs:
         # for i, datapoint in enumerate(devset):
-        for i, datapoint in enumerate(tqdm(devset, desc="Synthesizing devset outputs")):
+        for i, datapoint in enumerate(tqdm(devset, desc="Synthesizing audio outputs")):
             save_output(model, datapoint, os.path.join(FLAGS.output_directory, f'example_output_{i}.wav'), device, devset.mfcc_norm)
 
     evaluate(devset, FLAGS.output_directory)

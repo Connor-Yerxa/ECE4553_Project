@@ -4,6 +4,9 @@ import os
 import torch
 from torch import nn
 
+# Old Command
+# python evaluate.py --models transduction_model --output_directory evaluation_output
+
 from transduction_model import test, save_output, Model
 from read_emg import EMGDataset
 from asr import evaluate
@@ -43,7 +46,7 @@ def main():
 
     os.makedirs(FLAGS.output_directory, exist_ok=True)
     for i, datapoint in enumerate(testset):
-        save_output(ensemble, datapoint, os.path.join(FLAGS.output_directory, f'example_output_{i}.wav'), device)
+        save_output(ensemble, datapoint, os.path.join(FLAGS.output_directory, f'example_output_{i}.wav'), device, testset.mfcc_norm)
 
     evaluate(testset, FLAGS.output_directory)
 

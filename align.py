@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from numba import jit
 
 from sklearn.cross_decomposition import CCA
+from tqdm import tqdm
+
 
 @jit
 def time_warp(costs):
@@ -44,7 +46,9 @@ def get_all_alignments(dataset, feature_functions, weights=None, return_aligned_
         assert len(weights) == len(feature_functions)
     alignments = []
     aligned_features = []
-    for example in dataset:
+    # for example in dataset:
+    for example in tqdm(dataset, desc="Computing alignments"):
+
         f1, f2 = feature_functions[0](example)
         distances = scipy.spatial.distance.cdist(f1, f2, metric='euclidean')
         if weights is not None:

@@ -9,9 +9,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as torchdata
 
-# from nv_wavenet.pytorch.wavenet import WaveNet
-# from nv_wavenet.pytorch import nv_wavenet
-## from wavenet import WaveNet  # if you have a CPU-compatible version or stub
+from nv_wavenet.pytorch.wavenet import WaveNet
+from nv_wavenet.pytorch import nv_wavenet
+# from wavenet import WaveNet  # if you have a CPU-compatible version or stub
 
 from data_utils import splice_audio
 from read_emg import EMGDataset
@@ -26,26 +26,6 @@ flags.DEFINE_string('pretrained_wavenet_model', None, 'filename of model to star
 flags.DEFINE_float('clip_norm', 0.1, 'gradient clipping max norm')
 flags.DEFINE_boolean('wavenet_no_lstm', False, "don't use a LSTM before the wavenet")
 
-# class WavenetModel(nn.Module):
-#     def __init__(self, input_dim):
-#         super().__init__()
-#         if not FLAGS.wavenet_no_lstm:
-#             self.lstm = nn.LSTM(input_dim, 512, bidirectional=True, batch_first=True)
-#             self.projection_layer = nn.Linear(512*2, 128)
-#         else:
-#             self.projection_layer = nn.Linear(input_dim, 128)
-#         self.wavenet = WaveNet(n_in_channels=256, n_layers=16, max_dilation=128, n_residual_channels=64, n_skip_channels=256, n_out_channels=256, n_cond_channels=128, upsamp_window=432, upsamp_stride=160)
-#
-#     def pre_wavenet_processing(self, x):
-#         if not FLAGS.wavenet_no_lstm:
-#             x, _ = self.lstm(x)
-#             x = F.dropout(x, 0.5, training=self.training)
-#         x = self.projection_layer(x)
-#         return x.permute(0,2,1)
-#
-#     def forward(self, x, audio):
-#         x = self.pre_wavenet_processing(x)
-#         return self.wavenet((x, audio))
 class WavenetModel(nn.Module):
     def __init__(self, input_dim):
         super().__init__()
@@ -54,18 +34,40 @@ class WavenetModel(nn.Module):
             self.projection_layer = nn.Linear(512*2, 128)
         else:
             self.projection_layer = nn.Linear(input_dim, 128)
-        self.output_layer = nn.Linear(128, 256)  # replace WaveNet with simple output
+        self.wavenet = WaveNet(n_in_channels=256, n_layers=16, max_dilation=128, n_residual_channels=64, n_skip_channels=256, n_out_channels=256, n_cond_channels=128, upsamp_window=432, upsamp_stride=160)
 
     def pre_wavenet_processing(self, x):
         if not FLAGS.wavenet_no_lstm:
             x, _ = self.lstm(x)
             x = F.dropout(x, 0.5, training=self.training)
         x = self.projection_layer(x)
-        return x
+        return x.permute(0,2,1)
 
-    def forward(self, x, audio=None):
+    def forward(self, x, audio):
         x = self.pre_wavenet_processing(x)
-        return self.output_layer(x)
+        return self.wavenet((x, audio))
+
+# # Non Wavenet version
+# class WavenetModel(nn.Module):
+#     def __init__(self, input_dim):
+#         super().__init__()
+#         if not FLAGS.wavenet_no_lstm:
+#             self.lstm = nn.LSTM(input_dim, 512, bidirectional=True, batch_first=True)
+#             self.projection_layer = nn.Linear(512*2, 128)
+#         else:
+#             self.projection_layer = nn.Linear(input_dim, 128)
+#         self.output_layer = nn.Linear(128, 256)  # replace WaveNet with simple output
+#
+#     def pre_wavenet_processing(self, x):
+#         if not FLAGS.wavenet_no_lstm:
+#             x, _ = self.lstm(x)
+#             x = F.dropout(x, 0.5, training=self.training)
+#         x = self.projection_layer(x)
+#         return x
+#
+#     def forward(self, x, audio=None):
+#         x = self.pre_wavenet_processing(x)
+#         return self.output_layer(x)
 
 
 def test(wavenet_model, testset, device):
@@ -85,33 +87,33 @@ def test(wavenet_model, testset, device):
     wavenet_model.train()
     return np.mean(errors)
 
-# def save_output(wavenet_model, input_data, filename, device):
-#     wavenet_model.eval()
-#
-#     assert len(input_data.shape) == 2
-#     X = torch.tensor(input_data, dtype=torch.float32).to(device).unsqueeze(0)
-#
-#     wavenet = wavenet_model.wavenet
-#     inference_wavenet = nv_wavenet.NVWaveNet(**wavenet.export_weights())
-#     cond_input = wavenet_model.pre_wavenet_processing(X)
-#
-#     chunk_len = 400
-#     overlap = 1
-#     audio_chunks = []
-#     for i in range(0, cond_input.size(2), chunk_len-overlap):
-#         if cond_input.size(2)-i < overlap:
-#             break # don't make segment at end that doesn't go past overlapped part
-#         cond_chunk = cond_input[:,:,i:i+chunk_len]
-#         wavenet_cond_input = wavenet.get_cond_input(cond_chunk)
-#         audio_data = inference_wavenet.infer(wavenet_cond_input, nv_wavenet.Impl.SINGLE_BLOCK)
-#         audio_chunk = librosa.core.mu_expand(audio_data.squeeze(0).cpu().numpy()-128, 255, True)
-#         audio_chunks.append(audio_chunk)
-#
-#     audio_out = splice_audio(audio_chunks, overlap*160)
-#
-#     sf.write(filename, audio_out, 16000)
-#
-#     wavenet_model.train()
+def save_output(wavenet_model, input_data, filename, device):
+    wavenet_model.eval()
+
+    assert len(input_data.shape) == 2
+    X = torch.tensor(input_data, dtype=torch.float32).to(device).unsqueeze(0)
+
+    wavenet = wavenet_model.wavenet
+    inference_wavenet = nv_wavenet.NVWaveNet(**wavenet.export_weights())
+    cond_input = wavenet_model.pre_wavenet_processing(X)
+
+    chunk_len = 400
+    overlap = 1
+    audio_chunks = []
+    for i in range(0, cond_input.size(2), chunk_len-overlap):
+        if cond_input.size(2)-i < overlap:
+            break # don't make segment at end that doesn't go past overlapped part
+        cond_chunk = cond_input[:,:,i:i+chunk_len]
+        wavenet_cond_input = wavenet.get_cond_input(cond_chunk)
+        audio_data = inference_wavenet.infer(wavenet_cond_input, nv_wavenet.Impl.SINGLE_BLOCK)
+        audio_chunk = librosa.core.mu_expand(audio_data.squeeze(0).cpu().numpy()-128, 255, True)
+        audio_chunks.append(audio_chunk)
+
+    audio_out = splice_audio(audio_chunks, overlap*160)
+
+    sf.write(filename, audio_out, 16000)
+
+    wavenet_model.train()
 
 def train():
     if FLAGS.librispeech:

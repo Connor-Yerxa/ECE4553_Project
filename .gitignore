@@ -4,3 +4,4 @@ models/
 .idea/
 .ipynb_checkpoints/
 __pycache__/
+nv_wavenet/
